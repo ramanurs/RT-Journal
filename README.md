@@ -18,11 +18,11 @@ Where as day trader or swing trader can analyze their trading habits using visul
 > **Note: Python scripts are in python3.** 
 <br>
 
-The defalts endpoints to access robinhood api is in [Robinhood_Base.py](https://github.com/virajkothari7/Robinhood-trading-journal/blob/main/Robinhood_Base.py), 
+The defalts endpoints to access robinhood api is in [Robinhood_Base.py](https://github.com/ramanurs/RT-Journal/blob/main/Robinhood_Base.py), 
 one of the convienince I made in my script for login is that it is MFA app compatiable login, which means you can use your google code auth or duo to add MFA code to login. 
 Although I haven't worked on more methods since that are not useful in regards to this project, but you can give it a try. 
 
-The [Robin_hood.py](https://github.com/virajkothari7/Robinhood-trading-journal/blob/main/Robin_hood.py) scripts have methods on accessing order history for stocks and options, (will try to work on crypto later), current portfolio and dataframe of order history. 
+The [Robin_hood.py](https://github.com/ramanurs/RT-Journal/blob/main/Robin_hood.py) scripts have methods on accessing order history for stocks and options, (will try to work on crypto later), current portfolio and dataframe of order history. 
 Benefit of this script is that it accounts of stocks splits while calculating for profit/loss, if security was bought before split and sold after split. Although calculation are based on FIFO basis as per [Robinhood's default cost basis](https://robinhood.com/us/en/support/articles/cost-basis/). 
 However, wash sale calculation are not accounted. Also options calculation were quite complicated so at moment it only accounts for bought and sold or expired. If there is covered sell meaning that you sold option contract based on stocks owned, and option excersiced are not accounted. Hence those entities  are not included in calculations.
 
@@ -41,7 +41,7 @@ Cloning this repo:
 Change directory to desired location!!!
 
 >> cd Documents
->> git clone https://github.com/virajkothari7/Robinhood-trading-journal.git
+>> git clone https://github.com/ramanurs/RT-Journal.git
 >> cd Robinhood-trading-journal
 >> pip install -r requirements.txt
 
@@ -67,12 +67,12 @@ Below is screen shots of final app, also stored in snapshots folder.
 <br><br>
 <table>
   <tr>
-    <td><img src=https://github.com/virajkothari7/Robinhood-trading-journal/blob/main/snapshots/snapshot_1.gif></td>
-    <td><img src=https://github.com/virajkothari7/Robinhood-trading-journal/blob/main/snapshots/snapshot_3.gif></td>
+    <td><img src=https://github.com/ramanurs/RT-Journal/blob/main/snapshots/snapshot_1.gif></td>
+    <td><img src=https://github.com/ramanurs/RT-Journal/blob/main/snapshots/snapshot_3.gif></td>
   </tr>
   <tr>
-    <td><img src=https://github.com/virajkothari7/Robinhood-trading-journal/blob/main/snapshots/snapshot_2.gif></td>
-    <td><img src=https://github.com/virajkothari7/Robinhood-trading-journal/blob/main/snapshots/snapshot_5.gif></td>
+    <td><img src=https://github.com/ramanurs/RT-Journal/blob/main/snapshots/snapshot_2.gif></td>
+    <td><img src=https://github.com/ramanurs/RT-Journal/blob/main/snapshots/snapshot_5.gif></td>
   </tr>
 </table>
 <br> 
@@ -124,7 +124,7 @@ Community Credits: Python Community, Stack Exchange Community, Plolty Community,
 
 <br>
 
-# License [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/virajkothari7/Robinhood-trading-journal/blob/main/LICENSE)
+# License [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/ramanurs/RT-Journal/blob/main/LICENSE)
 
 This project is licensed under MIT. You are responsible for using robinhood's private api and all depending third-party libraries by running the scripts, look robinhood's and respective python libraries terms of use.
 
