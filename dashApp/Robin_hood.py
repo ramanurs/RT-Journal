@@ -33,12 +33,12 @@ Defined methods on Robinhood class
  'positions_owned',
 """
 
-
 import pandas as pd
 import numpy as np
 import yfinance as yf
 import os, shutil, sys
-from Robinhood_Base import Robinhood
+#from Robinhood_Base import Robinhood
+from Robinhood_Using_RS import RobinhoodUsingRS as Robinhood
 #Methods Portfolio
 ####### Getting stock portfolio 
 def stocksPortfolioDataframe(self):

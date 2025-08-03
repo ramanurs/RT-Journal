@@ -8,8 +8,7 @@ import pathlib as path
 from datetime import datetime, timezone
 from getpass import getpass
 
-
-class Robinhood:
+class RobinhoodUsingRS:
 
     endpoints = {
         "accounts": "https://api.robinhood.com/accounts/",
@@ -40,7 +39,6 @@ class Robinhood:
     instrumentsList = {}
     instrumentBasic = {}
 
-    #Creating Robinhood object by logging in Robinhood API
     def __init__(self):
         self.session = requests.session()
         try:
@@ -58,12 +56,6 @@ class Robinhood:
         }
         self.session.headers = self.headers
 
-
-
-###############################################################################################################
-#####--------          User Login and Logout Method          --------------------------------------------------
-###############################################################################################################
-
     def mfa_login(self, data_load,attempt = 3):
         data_load["mfa_code"] = str(input("Input mfa code: "))
         response= self.session.post(self.endpoints['login'],data=data_load) 
@@ -77,7 +69,6 @@ class Robinhood:
             print("Too many attempts for login")
             print("Please restart the kernal and try back login")
             self.session.close()
-
 
     def challenge_login(self, data_load,res,attempt = 3):
         challenge_url = ("https://api.robinhood.com/"f"challenge/{res['challenge']['id']}/respond/")
@@ -102,11 +93,8 @@ class Robinhood:
             print("Please restart the kernal and try back login")
             self.session.close()
 
-
-#######  Login Method
-#You will need to change mfa if you dont want to have mfa 
     def login(self, username=None, password=None, attempts = 3):
-        self.device_token: str = ("device_token", str(uuid.uuid4())) 
+        self.device_token: str = (str(uuid.uuid4())) 
         while True:
             data_load = {
                     'username' : username if (username and attempts == 3) else str(input("Please Enter User Email Id : ")),
@@ -126,7 +114,6 @@ class Robinhood:
             print("response code: %s" %res.status_code)
             print("response text: %s" %res.text)
             print("response json: %s" %res.json())
-
 
             if (res.status_code != requests.codes.ok) and (attempts > 0):
                 print("Invalid Username or Password: No of Attempts left %s" %attempts)
@@ -160,8 +147,6 @@ class Robinhood:
         self.headers['Authorization'] = 'Bearer ' + self.auth_token
         return True
 
-
-###### Logout method
     def logout(self):
         logout_load = {"client_id": self.client_id, "token": self.auth_token}
         try:
@@ -176,68 +161,27 @@ class Robinhood:
             print(e)
             return False
 
-
-
-###############################################################################################################
-#####-----------------------------Gettting Endpoints-----------------------------------------------------------
-###############################################################################################################
-    #Gets response from given url
     def get_url(self,url):
-        """
-           This method is get to links from client script
-           Parameters
-            ----------
-            url : str
-                DESCRIPTION : Will get response from url.
-
-            Returns
-            -------
-            JSON
-                DESCRIPTION : sends backs json object of response.
-        """
         return self.session.get(url).json()
 
-
-
-    #Gets account details
     def get_account(self):
         return pd.Series(self.session.get(self.endpoints['accounts']).json()['results'][0])
 
-
-    # Gives User profile from Robinhood
     def get_user(self):
         return self.session.get(self.endpoints['user']).json()
 
-
-    # Gives the market details
     def get_markets(self):
         return self.session.get(self.endpoints['markets']).json()
 
-
-    #Gives overview of documents you can access
     def get_documentsInfo(self):
         response = self.session.get(self.endpoints['documents']).json()
         if response: return pd.DataFrame(pd.DataFrame(response).results.tolist())
         else: return False
 
-
-    #Sends back account portfolio
     def get_portfolios(self):
         return self.session.get(self.endpoints['portfolios']).json()
 
-
-
-    #Gets All the positions I assume
     def get_positions(self):
-        """
-        Returns
-        -------
-        result : LIST
-            DESCRIPTION : This method gives all the position holded, this method
-                            does not give you the postions you own at the moment
-                                For that go to @positions_owned.
-
-        """
         response =  self.session.get(self.endpoints['positions']).json()
         result = response["results"]
         while response["next"]:
@@ -245,19 +189,7 @@ class Robinhood:
             result += response["results"]
         return result
 
-
-
-    #Gets All the positions I assume
     def get_optionsPositions(self):
-        """
-        Returns
-        -------
-        result : LIST
-            DESCRIPTION : This method gives all the position holded, this method
-                            does not give you the postions you own at the moment
-                                For that go to @positions_owned.
-
-        """
         response =  self.session.get(self.endpoints['optionsPositions']).json()
         result = response["results"]
         while response["next"]:
@@ -265,21 +197,7 @@ class Robinhood:
             result += response["results"]
         return result
 
-
-
-    #Basic schema so we can get symbol and other stuff if needed
     def basicInstrumentSchema(self,obj):
-        """
-        Parameters
-        ----------
-        obj : Single Dictionary
-            DESCRIPTION : It should be sictinary from response so we can filter out Instrument.
-
-        Returns
-        -------
-        returnObj : Dictionary
-            DESCRIPTION : After filtering it returns below variables.
-        """
         returnObj = {
             'instrument_id'  : obj['id'],
             'url' : obj['url'],
@@ -295,31 +213,13 @@ class Robinhood:
             }
         return returnObj
 
-
-    #Get list of instruments if no stock is given, else accept single stock string to make query
     def get_instruments(self , stock = False):
         if stock:
             return self.session.get(self.endpoints['instruments'], params={'query':stock.upper()}).json()
         else:
             return self.session.get(self.endpoints['instruments']).json()
 
-
-
-    # Instrument method without filtering out basic schecma
     def instrumentObject(self,url):
-        """
-        Parameters
-        ----------
-        url : str or list
-            DESCRIPTION : Will accept a string or list and get all the instrument from api or stored in memory
-
-        Returns
-        -------
-        TYPE JSON
-            DESCRIPTION : Will return single dictionary or list of dictiory depending on argument provided.
-        
-            This stores items in instrumentsList
-        """
         def instrument(url):
             if url in self.instrumentsList.keys():
                     return self.instrumentsList[url]
@@ -339,23 +239,7 @@ class Robinhood:
             return returnObj
         else: return instrument(url)
 
-
-
-    # Instrument method with filtering basic schecma as I don't need all stuff
     def get_instrumentBasic(self,url):
-        """
-        Parameters
-        ----------
-        url : str or list
-            DESCRIPTION : Will accept a string or list and get all the instrument from api or stored in memory
-
-        Returns
-        -------
-        TYPE JSON
-            DESCRIPTION : Will return single dictionary or list of dictiory depending on argument provided.
-        
-            This stores items in instrumentBasic
-        """
         def instrument(url):
             if url in self.instrumentBasic.keys():
                 return self.instrumentBasic[url]
@@ -377,9 +261,6 @@ class Robinhood:
             return pd.DataFrame(returnObj).drop_duplicates()
         else: return instrument(url)
 
-
-
-    #Work in progress
     def get_optionsObject(self,url):
         response = self.get_url(url)
         date= datetime.strptime(response["expiration_date"],'%Y-%m-%d').date()
@@ -388,24 +269,7 @@ class Robinhood:
         return {"optionName" : returnstring, "state" :response["state"],'strikePrice': response['strike_price'],
                 "optionType" :response["type"].upper(), "expDate" : date}
 
-
-    #Gets recent quote for stock.
     def get_quotes(self,stock):
-        """
-
-        Parameters
-        ----------
-        stock : str or list
-            DESCRIPTION.
-                Will accept list or a string of symbol and send a api query with stock
-        Returns
-        -------
-        False or str(price) or a dict #Note: You can change return type dict to series if that is bemeficial to you
-            DESCRIPTION.
-                Depending on how you call function if you call function on list then you should get,
-                if you call it on single stock then you should only get last trade pice as string
-
-        """
         try:
             if isinstance(stock, list):
                 url = str(self.endpoints['quotes'] + "?symbols=" + ",".join([i.upper() for i in stock]))
@@ -423,12 +287,6 @@ class Robinhood:
             print("Error: "+str(e))
             return False
 
-
-
-
-##############################################################################################################
-#######------------ Defining Methods with respect to order history and trading journal -----------------------
-##############################################################################################################
     def options_owned(self):
         options = self.session.get(self.endpoints['optionsPositions']+'?nonzero=true').json()
         try:
@@ -441,7 +299,6 @@ class Robinhood:
             print("Error occured at options_owned method, %s" %e)
             return False
 
-
     def positions_owned(self):
         positions = self.session.get(self.endpoints['positions']+'?nonzero=true').json()
         try:
@@ -453,7 +310,6 @@ class Robinhood:
         except Exception as e:
             print("Error occured at postions_owned method, %s" %e)
             return False
-            
 
     def get_dividends(self):
         response = self.session.get(self.endpoints['dividends'])
@@ -468,16 +324,7 @@ class Robinhood:
             return tmp_result
         else: return response
 
-
-    # Gets One's Option Order list from Robinhood
     def get_optionsOrders(self):
-        """
-        Returns
-        -------
-        result : LIST
-            DESCRIPTION : This gets one's options order list from Robinhood.
-
-        """
         response = self.session.get(self.endpoints['optionsOrders']).json()
         result = response["results"]
         while response["next"]:
@@ -485,29 +332,13 @@ class Robinhood:
             result += response["results"]
         return result
 
-
-    # Gets list of stock orders from robinhood
     def get_orders(self):
-        """
-        Returns
-        -------
-        result : LIST
-            DESCRIPTION : This gets one's stocks order list from Robinhood.
-
-        """
         response = self.session.get(self.endpoints['orders']).json()
         result = response["results"]
         while response["next"]:
             response = self.session.get(response["next"]).json()
             result += response["results"]
         return result
-
-
-
-#-------------------------------------------------------------------------------------------------------------
-# This is method was created for personal use only.
-# I do not recommend you to use it since it can end up being many files 
-# Use at your own understanding
 
     def savePdf(self,url: str):
         try:
@@ -519,16 +350,8 @@ class Robinhood:
             print("Downloadn error : %s" %e)
             return False
 
-
     def downloadPdf(self,pdfType:str='account_statement', start_date = "2000-01-01",
                         end_date = str(datetime.now().date())):
-        
-            # Easier way to download all statements than clinking one by one
-            # pdfType : '1099', 'account_statement', 'trade_confirm' ; define one at time
-            # start_date and end_date should be in format "YYYY-MM-DD"
-            # 1099 crypto will be csv format but you can download it and change extn manually
-            #    it should work fine. I didn't apply csv becase it were only couple of them per user 
-        
         if pdfType not in ['1099', 'account_statement', 'trade_confirm']:
             pdfType = 'account_statement'
         df = self.get_documentsInfo()
@@ -546,7 +369,3 @@ class Robinhood:
                 download_log[i.split("/")[-3]] = self.savePdf(i)
             return download_log
         return False
-#-------------------------------------------------------------------------------------------------------------
-
-
-
